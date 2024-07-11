@@ -22,6 +22,11 @@
     (lambda (x)
        (g (f x)))))
 ; added function
+; Signature: compose$(f g cont)
+; Type: [T1 -> T2] * [T2 -> T3]  -> [T1->T3]
+; Purpose: given two unary functions return their composition, in the same order left to right
+; test: ((compose - sqrt) 16) ==> -4
+;       ((compose not not) true)==> true
 (define compose$
   (lambda (f$ g$ cont1)
     (cont1 (lambda (x cont2)
