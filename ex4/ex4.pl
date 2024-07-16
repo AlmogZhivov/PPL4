@@ -43,10 +43,6 @@ reverse([[X, Y] | Rest], [[Y, X] | ReversedRest]) :-
     reverse(Rest, ReversedRest).
 
 
-% Define Church numerals
-natural_number(zero).
-natural_number(s(X)) :- natural_number(X).
-
 % Signature: degree(Node, Graph, Degree)/3
 % Purpose: Degree is the out-degree of Node, denoted by a Church number
 
