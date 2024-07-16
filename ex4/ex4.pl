@@ -12,62 +12,25 @@ maximum_printing_depth(100).
    maximum_printing_depth(MPD),
    set_prolog_flag(toplevel_print_options, [max_depth(MPD)|B]).
 
+% Define the edges of the graph
+edge(a, b).
+edge(a, c).
+edge(c, b).
+edge(c, a). 
 
 % Signature: path(Node1, Node2, Path)/3
 % Purpose: Path is a path, denoted by a list of nodes, from Node1 to Node2.
-path(Node1, Node2, Path) :-
-    path_helper(Node1, Node2, [Node1], Path).
-
-% Helper predicate to find the path while avoiding cycles
-path_helper(Node2, Node2, Acc, Path) :-
-    reverse(Acc, Path).
-
-path_helper(Node1, Node2, Acc, Path) :-
-    edge(Node1, NextNode),
-    path_helper(NextNode, Node2, [NextNode|Acc], Path).
+path(Node1, Node2, [Node1, Node2]):- edge(Node1, Node2). % base case
+path(Node1, Node2, [Node1|Paths]):- edge(Node1, OtherNode), path(OtherNode, Node2, Paths).
 
 
 % Signature: cycle(Node, Cycle)/2
 % Purpose: Cycle is a cyclic path, denoted a list of nodes, from Node to Node.
-cycle(Node, Cycle) :-
-    path_helper(Node, Node, [Node], ReversedCycle),
-    length(ReversedCycle, Len),
-    Len > 1, % Ensure the cycle is not just [Node]
-    reverse(ReversedCycle, Cycle).
-
-% Helper predicate to find the path while avoiding cycles
-path_helper(Node2, Node2, Acc, Acc).
-
-path_helper(Node1, Node2, Acc, Path) :-
-    edge(Node1, NextNode),
-    path_helper(NextNode, Node2, [NextNode|Acc], Path).
-
-% Helper predicate to reverse a list
-reverse([], []).
-reverse([Head|Tail], ReversedList) :-
-    reverse(Tail, ReversedTail),
-    append(ReversedTail, [Head], ReversedList).
-
-% Helper predicate to append two lists
-append([], List, List).
-append([Head|Tail], List, [Head|Result]) :-
-    append(Tail, List, Result).
-
-
-
+cycle(Node, Cycle) :- path(Node, Node, Cycle).
 
 
 % Signature: nodes(Nodes)/1
 % Purpose: Nodes are the nodes in the graph
-
-
-
-
-
-
-
-
-
 
 
 % Signature: reverse(Graph1, Graph2)/2
@@ -75,17 +38,9 @@ append([Head|Tail], List, [Head|Result]) :-
 
 % Base case: The reverse of an empty graph is an empty graph.
 reverse([], []).
-
 % Recursive case: Reverse the edge and process the rest of the graph.
 reverse([[X, Y] | Rest], [[Y, X] | ReversedRest]) :-
     reverse(Rest, ReversedRest).
-
-
-
-
-
-
-
 
 
 % Define Church numerals
@@ -104,12 +59,6 @@ degree(Node, [[Node, _]|Rest], s(Degree)) :-
 degree(Node, [[Other1, _]|Rest], Degree) :-
     Node \= Other1,
     degree(Node, Rest, Degree).
-
-
-
-
-
-
 
 
 % Signature: spanning_tree(Tree)/1
