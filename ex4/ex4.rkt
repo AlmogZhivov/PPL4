@@ -69,7 +69,9 @@
 ; Purpose: Returns the reduced value of the given lazy list
 (define reduce1-lzl 
   (lambda (reducer init lzl) (
-       reduce1-lzl reducer (reducer init (head lzl)) (tail lzl)
+       if (empty-lzl? lzl)
+       init
+       (reduce1-lzl reducer (reducer init (head lzl)) (tail lzl))
     )
   )
 )  
@@ -80,7 +82,7 @@
 ; Purpose: Returns the reduced value of the first n items in the given lazy list
 (define reduce2-lzl 
   (lambda (reducer init lzl n) (
-      if (= n 0)
+      if (or (= n 0) (empty-lzl? lzl))
          init
          (reduce2-lzl reducer (reducer init (head lzl)) (tail lzl) (- n 1))
   )
@@ -93,7 +95,7 @@
 ; Purpose: Returns the reduced values of the given lazy list items as a lazy list
 (define reduce3-lzl 
   (lambda (reducer init lzl) (
-       (reduce3-helper-function reducer init lzl 1)
+       reduce3-helper-function reducer init lzl 1
     )
   )
 )
@@ -103,7 +105,7 @@
 ; Purpose: Returns the lazy list for Q2c, defined recursively on the parameter n.
 (define reduce3-helper-function (
     lambda (reducer init lzl n) (
-         cons (reduce2-lzl reducer init lzl n) (reduce3-helper-function reducer init lzl (+ n 1))
+         cons (reduce2-lzl reducer init lzl n) (lambda () (reduce3-helper-function reducer init lzl (+ n 1)))
      )
    )
 )
@@ -114,7 +116,7 @@
 ; Purpose: Returns a list of integers from 'from' with 'steps' jumps
 (define integers-steps-from
   (lambda (from step) (
-      cons (from) (lambda () (integers-steps-from (+ from step) step))
+      cons from (lambda () (integers-steps-from (+ from step) step))
     )
   )
 )
@@ -125,23 +127,33 @@
 ; Purpose: Returns the approximations of pi as a lazy list
 (define generate-pi-approximations
   (lambda ()
-     (rec-generate-pi-approximations (a-division-lzl (integers-steps-from 1 4)) 1)
+     (reduce3-lzl + 0 (a-division-lzl (integers-steps-from 1 4)))
    )
  )
 
 
-(define rec-generate-pi-approximations (
-     lambda (lzl n) (
-           cons (reduce3-lzl n) (rec-generate-pi-approximations lzl (+ n 1))
-      )
-  )
-)
-
+; Signature: a-division-lzl(a)
+; Type: LzL<Number> -> LzL<Number>
 (define a-division-lzl (
      lambda (a) (
-        cons (/ 1 (* (head a) (+ (head a) 2))) (a-division-lzl (tail a))
+        cons (/ 8 (* (head a) (+ (head a) 2))) (lambda () (a-division-lzl (tail a)))
      )
    )
  )
 
+
+
+;;;; -------------------- for testing ---------------------
+
+(define integers-from
+   (lambda (n)
+       (cons-lzl n (lambda () (integers-from (+ n 1))))))
+
+
+(define take
+  (lambda (lz-lst n)
+    (if (or (= n 0) (empty-lzl? lz-lst))
+      empty-lzl
+      (cons (head lz-lst)
+                 (take (tail lz-lst) (- n 1))))))
 
