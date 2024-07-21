@@ -127,9 +127,14 @@
 ; Purpose: Returns the approximations of pi as a lazy list
 (define generate-pi-approximations
   (lambda ()
-     (reduce3-lzl + 0 (a-division-lzl (integers-steps-from 1 4)))
+     (reduce3-lzl + 0 (lzl-map (lambda (a) (/ 8 (* a (+ a 2)))) (integers-steps-from 1 4)))
    )
  )
+
+
+
+(lambda (a) (
+     / 8 (* (head a) (+ (head a) 2))) )
 
 
 ; Signature: a-division-lzl(a)
@@ -140,6 +145,16 @@
      )
    )
  )
+
+
+;; Signature: lzl-map(f, lz)
+;; Type: [[T1 -> T2] * Lzl(T1) -> Lzl(T2)]
+(define lzl-map
+  (lambda (f lzl)
+    (if (empty-lzl? lzl)
+        lzl
+        (cons-lzl (f (head lzl))
+                       (lambda () (lzl-map f (tail lzl)))))))
 
 
 
