@@ -132,21 +132,6 @@
  )
 
 
-
-(lambda (a) (
-     / 8 (* (head a) (+ (head a) 2))) )
-
-
-; Signature: a-division-lzl(a)
-; Type: LzL<Number> -> LzL<Number>
-(define a-division-lzl (
-     lambda (a) (
-        cons (/ 8 (* (head a) (+ (head a) 2))) (lambda () (a-division-lzl (tail a)))
-     )
-   )
- )
-
-
 ;; Signature: lzl-map(f, lz)
 ;; Type: [[T1 -> T2] * Lzl(T1) -> Lzl(T2)]
 (define lzl-map
@@ -156,19 +141,4 @@
         (cons-lzl (f (head lzl))
                        (lambda () (lzl-map f (tail lzl)))))))
 
-
-
-;;;; -------------------- for testing ---------------------
-
-(define integers-from
-   (lambda (n)
-       (cons-lzl n (lambda () (integers-from (+ n 1))))))
-
-
-(define take
-  (lambda (lz-lst n)
-    (if (or (= n 0) (empty-lzl? lz-lst))
-      empty-lzl
-      (cons (head lz-lst)
-                 (take (tail lz-lst) (- n 1))))))
 
