@@ -68,8 +68,11 @@
 ; Type: [T2*T1 -> T2] * T2 * LzL<T1> -> T2
 ; Purpose: Returns the reduced value of the given lazy list
 (define reduce1-lzl 
-  (lambda (reducer init lzl)
-   #f ;@TODO
+  (lambda (reducer init lzl) (
+       if (empty-lzl? lzl)
+       init
+       (reduce1-lzl reducer (reducer init (head lzl)) (tail lzl))
+    )
   )
 )  
 
@@ -78,28 +81,43 @@
 ; Type: [T2*T1 -> T2] * T2 * LzL<T1> * Number -> T2
 ; Purpose: Returns the reduced value of the first n items in the given lazy list
 (define reduce2-lzl 
-  (lambda (reducer init lzl n)
-    #f ;@TODO
+  (lambda (reducer init lzl n) (
+      if (or (= n 0) (empty-lzl? lzl))
+         init
+         (reduce2-lzl reducer (reducer init (head lzl)) (tail lzl) (- n 1))
   )
-)  
+)
+)
 
 ;;; Q2c
 ; Signature: reduce3-lzl(reducer, init, lzl) 
 ; Type: [T2 * T1 -> T2] * T2 * LzL<T1> -> Lzl<T2>
 ; Purpose: Returns the reduced values of the given lazy list items as a lazy list
 (define reduce3-lzl 
-  (lambda (reducer init lzl)
-    #f ;@TODO
+  (lambda (reducer init lzl) (
+       reduce3-helper-function reducer init lzl 1
+    )
   )
-)  
+)
+
+; Signature: reduce3-helper-function(reducer init lzl n)
+; Type: [T2 * T1 -> T2] * T2 * LzL<T1> * Number -> Lzl<T2>
+; Purpose: Returns the lazy list for Q2c, defined recursively on the parameter n.
+(define reduce3-helper-function (
+    lambda (reducer init lzl n) (
+         cons (reduce2-lzl reducer init lzl n) (lambda () (reduce3-helper-function reducer init lzl (+ n 1)))
+     )
+   )
+)
  
 ;;; Q2e
 ; Signature: integers-steps-from(from,step) 
 ; Type: Number * Number -> Lzl<Number>
 ; Purpose: Returns a list of integers from 'from' with 'steps' jumps
 (define integers-steps-from
-  (lambda (from step)
-    #f ; @TODO
+  (lambda (from step) (
+      cons from (lambda () (integers-steps-from (+ from step) step))
+    )
   )
 )
 
@@ -109,6 +127,48 @@
 ; Purpose: Returns the approximations of pi as a lazy list
 (define generate-pi-approximations
   (lambda ()
-    #f ; @TODO
+     (reduce3-lzl + 0 (lzl-map (lambda (a) (/ 8 (* a (+ a 2)))) (integers-steps-from 1 4)))
    )
  )
+
+
+
+(lambda (a) (
+     / 8 (* (head a) (+ (head a) 2))) )
+
+
+; Signature: a-division-lzl(a)
+; Type: LzL<Number> -> LzL<Number>
+(define a-division-lzl (
+     lambda (a) (
+        cons (/ 8 (* (head a) (+ (head a) 2))) (lambda () (a-division-lzl (tail a)))
+     )
+   )
+ )
+
+
+;; Signature: lzl-map(f, lz)
+;; Type: [[T1 -> T2] * Lzl(T1) -> Lzl(T2)]
+(define lzl-map
+  (lambda (f lzl)
+    (if (empty-lzl? lzl)
+        lzl
+        (cons-lzl (f (head lzl))
+                       (lambda () (lzl-map f (tail lzl)))))))
+
+
+
+;;;; -------------------- for testing ---------------------
+
+(define integers-from
+   (lambda (n)
+       (cons-lzl n (lambda () (integers-from (+ n 1))))))
+
+
+(define take
+  (lambda (lz-lst n)
+    (if (or (= n 0) (empty-lzl? lz-lst))
+      empty-lzl
+      (cons (head lz-lst)
+                 (take (tail lz-lst) (- n 1))))))
+
